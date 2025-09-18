@@ -99,7 +99,7 @@ Nampilake link kontrak & transaksi ing explorer.
 🔗 Contract link: https://explorer.asu/testnet/address/0x1234567890abcdef...
 🔗 Deployment TX: https://explorer.tx.mbut/testnet/tx/0xabcdef1234567890...
 ```
-## File Smart contract.dol di kumpulke ing folder contracts
+## File Smart contract.sol di kumpulke ing folder contracts
 ---
 
 ## Dependency
