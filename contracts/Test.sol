@@ -25,7 +25,7 @@ contract Test {
     modifier whenNotPaused() { require(!paused, "Paused"); _; }
     constructor() {
         owner = msg.sender;
-        totalSupply = 10000000000000000000000;
+        totalSupply = 1000000000000000000000000;
         _balances[owner] = totalSupply;
         emit Transfer(address(0), owner, totalSupply);
         emit OwnershipTransferred(address(0), owner);
