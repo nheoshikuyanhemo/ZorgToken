@@ -92,13 +92,13 @@ Nampilake link kontrak & transaksi ing explorer.
 ---
 
 ## Contoh Output
-
+```
 📄 Kontrak MyToken.sol digawe!
 🚀 Deploying MyToken...
 ✅ Contract deployed: 0x1234567890abcdef...
 🔗 Contract link: https://explorer.asu/testnet/address/0x1234567890abcdef...
 🔗 Deployment TX: https://explorer.tx.mbut/testnet/tx/0xabcdef1234567890...
-
+```
 
 ---
 
