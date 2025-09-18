@@ -1,12 +1,12 @@
 {
   "name": "zorgtoken",
   "version": "1.0.0",
-  "description": "",
+  "description": "script Deploy ERC20 by 0xEixa",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "0xEixa",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.2",
