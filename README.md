@@ -3,7 +3,7 @@ Script Kanggo Deploy ERC20
 
 # Multi-Contract ERC-20 Deployer
 
-Iki skrip Node.js kanggo **nggawe, compile, lan deploy akeh kontrak ERC-20 sekaligus** menyang jaringan EVM (kaya KiiChain). Skrip iki ndhukung fitur tambahan kaya mint, burn, pause, freeze, lan ngatur decimals & total supply.
+Iki skrip Node.js kanggo **nggawe, compile, lan deploy akeh kontrak ERC-20 sekaligus** menyang jaringan EVM (kaya Ethereum lan liane sing suport EVM). Skrip iki ndhukung fitur tambahan kaya mint, burn, pause, freeze, lan ngatur decimals & total supply.
 
 ---
 
