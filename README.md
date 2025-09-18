@@ -19,7 +19,9 @@ Iki skrip Node.js kanggo **nggawe, compile, lan deploy akeh kontrak ERC-20 sekal
 - Compile otomatis nganggo **solc**.
 - Deploy nganggo **ethers.js** karo wallet saka `.env`.
 - Auto-generate **link kontrak & transaksi** ing explorer saka `.env`.
-
+- hapus mari depkoy
+- burn kabeh token
+- tx burn
 ---
 
 ## Persiapan
@@ -75,7 +77,9 @@ Skrip bakal onok pilihane:
 
 7. Gunakake suffix acak? (kanggo kontrak luwih saka siji)
 
+8. hapus file mari deploy
 
+9. burn kabeh token 
 
 Sakwise input, skrip bakal:
 

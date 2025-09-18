@@ -1,10 +1,12 @@
 #!/usr/bin/env node
+
 import fs from "fs";
 import path from "path";
 import readline from "readline";
 import solc from "solc";
 import { ethers } from "ethers";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const rl = readline.createInterface({
@@ -23,37 +25,33 @@ function randomSuffix() {
 async function main() {
   try {
     console.log(`
-██████╗ ██╗   ██╗     ██╗  ██████╗ 
-██╔════╝██║     ██║ ██╔═══██╗  ██║ 
-█████╗  ██║      ███║     ██   ██╔╝ ║
-██╔══╝  ██║     ██║ ██║   ███████╔═║
+██████╗ ██╗   ██╗     ██╗  ██████╗
+██╔════╝██║     ██║ ██╔═══██╗  ██
+█████╗  ██║      ███║     ██   ██╔╝
+██╔══╝  ██║     ██║ ██║   ███████╔═
 ██████╚ ██╔  ╗██║     ██║ ██   ██║
-╚═╝      ╚═════╝  ╚═════╝ ╚═╝  ╚═╝
+╚═════ ╚═══   ══╝    ╚══╝ ╚═╝  ╚═╝
 ⚡ Multi-Contract Deployer by Eixa
 Tekan ENTER untuk memulai...
 `);
     await ask("");
 
     // --- INPUT USER ---
-    let contractCount = await ask("Berapa banyak smart contract yang mau dibuat? ");
-    contractCount = parseInt(contractCount) || 1;
-
+    let contractCount = parseInt(await ask("Berapa banyak smart contract yang mau dibuat? ")) || 1;
     const baseName = await ask("Base Token Name: ");
     const baseSymbol = await ask("Token Symbol: ");
-    let totalSupply = await ask("Total Supply (angka, ex: 1000000): ");
-    totalSupply = BigInt(totalSupply) * 10n ** 18n;
-
+    let totalSupply = BigInt(await ask("Total Supply (angka, ex: 1000000): ")) * 10n ** 18n;
     const addBurn = (await ask("Add burn function? (y/n): ")).toLowerCase() === "y";
     const addMint = (await ask("Add mint function? (y/n): ")).toLowerCase() === "y";
     const addPause = (await ask("Add pause/unpause function? (y/n): ")).toLowerCase() === "y";
     const addFreeze = (await ask("Add freeze/unfreeze function? (y/n): ")).toLowerCase() === "y";
-
     let decimals = await ask("Decimals (default 18, enter to skip): ");
     decimals = decimals ? parseInt(decimals) : 18;
-
     const useRandomSuffix = (contractCount > 1)
       ? (await ask("Gunakan suffix random? (y/n): ")).toLowerCase() === "y"
       : false;
+    const deleteAfterDeploy = (await ask("Hapus file .sol setelah deploy? (y/n): ")).toLowerCase() === "y";
+    const burnAfterDeploy = (await ask("Burn seluruh token ke wallet dead setelah deploy? (y/n): ")).toLowerCase() === "y";
 
     rl.close();
 
@@ -67,7 +65,6 @@ Tekan ENTER untuk memulai...
       let suffix = useRandomSuffix ? randomSuffix() : (contractCount > 1 ? i : "");
       let contractName = `${baseName}${suffix}`;
       let contractSymbol = `${baseSymbol}${useRandomSuffix ? randomSuffix() : suffix}`;
-
       const fileName = contractName + ".sol";
       const contractPath = path.join(contractsDir, fileName);
 
@@ -92,13 +89,8 @@ contract ${contractName} {
     bool public paused = false;
     event Paused(address indexed account);
     event Unpaused(address indexed account);`;
-
-      if (addBurn) code += `
-    event Burn(address indexed account, uint256 amount);`;
-
-      if (addMint) code += `
-    event Mint(address indexed account, uint256 amount);`;
-
+      if (addBurn) code += `\n    event Burn(address indexed account, uint256 amount);`;
+      if (addMint) code += `\n    event Mint(address indexed account, uint256 amount);`;
       if (addFreeze) code += `
     mapping(address => bool) public frozen;
     event Frozen(address indexed account);
@@ -106,9 +98,7 @@ contract ${contractName} {
 
       code += `
     modifier onlyOwner() { require(msg.sender == owner, "Not owner"); _; }`;
-
-      if (addPause) code += `
-    modifier whenNotPaused() { require(!paused, "Paused"); _; }`;
+      if (addPause) code += `\n    modifier whenNotPaused() { require(!paused, "Paused"); _; }`;
 
       code += `
     constructor() {
@@ -182,10 +172,10 @@ contract ${contractName} {
     function freeze(address account) external onlyOwner { frozen[account] = true; emit Frozen(account); }
     function unfreeze(address account) external onlyOwner { frozen[account] = false; emit Unfrozen(account); }`;
 
-      code += `\n}`;
+      code += "\n}";
 
       fs.writeFileSync(contractPath, code);
-      console.log(`📄 Kontrak ${fileName} dibuat!`);
+      console.log(`📄 [${i}/${contractCount}] Kontrak ${fileName} dibuat!`);
 
       // --- Compile ---
       const input = {
@@ -193,6 +183,7 @@ contract ${contractName} {
         sources: { [fileName]: { content: code } },
         settings: { outputSelection: { "*": { "*": ["abi", "evm.bytecode.object"] } } },
       };
+
       const output = JSON.parse(solc.compile(JSON.stringify(input)));
 
       if (output.errors && output.errors.some(e => e.severity === "error")) {
@@ -206,24 +197,40 @@ contract ${contractName} {
 
       try {
         const factory = new ethers.ContractFactory(abi, bytecode, wallet);
-        console.log(`🚀 Deploying ${contractName}...`);
+        console.log(`🚀 [${i}/${contractCount}] Deploying ${contractName}...`);
         const deployed = await factory.deploy();
-
-        // Tunggu mined
         await deployed.deploymentTransaction().wait();
 
         const txHash = deployed.deploymentTransaction().hash;
         const explorerUrl = process.env.EXPLORER_URL;
-        console.log(`✅ Contract deployed: ${deployed.target}`);
+
+        console.log(`✅ [${i}/${contractCount}] Contract deployed: ${deployed.target}`);
         console.log(`🔗 Contract link: ${explorerUrl}/address/${deployed.target}`);
         console.log(`🔗 Deployment TX: ${explorerUrl}/tx/${txHash}`);
-//        const txHash = deployed.deploymentTransaction().hash;
-//        console.log(`🔗 Contract link: https://explorer.kiichain.io/testnet/address/${deployed.target}`);
-//        console.log(`🔗 Deployment TX: https://explorer.kiichain.io/testnet/tx/${txHash}`);
+
+        // --- Burn if requested ---
+        if (burnAfterDeploy && addBurn) {
+          const contractInstance = new ethers.Contract(deployed.target, abi, wallet);
+          const balance = await contractInstance.balanceOf(wallet.address);
+          if (balance > 0) {
+            const burnTx = await contractInstance.burn(balance);
+            console.log(`🔥 [${i}/${contractCount}] Seluruh token (${balance}) diburn ke 0x000000000000000000000000000000000000dEaD`);
+            console.log(`🔗 Burn TX: ${explorerUrl}/tx/${burnTx.hash}`);
+            await burnTx.wait();
+          }
+        }
+
+        // --- Delete file if requested ---
+        if (deleteAfterDeploy) {
+          fs.unlinkSync(contractPath);
+          console.log(`🗑️ [${i}/${contractCount}] File ${fileName} dihapus setelah deploy.`);
+        }
+
       } catch (deployError) {
         console.error("❌ Deploy gagal:", deployError);
       }
     }
+
   } catch (err) {
     console.error("Error:", err);
     rl.close();

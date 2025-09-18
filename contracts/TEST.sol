@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract Njajal {
-    string public name = "Njajal";
-    string public symbol = "NJ";
+contract TEST {
+    string public name = "TEST";
+    string public symbol = "TEST";
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
     address public owner;
@@ -25,7 +25,7 @@ contract Njajal {
     modifier whenNotPaused() { require(!paused, "Paused"); _; }
     constructor() {
         owner = msg.sender;
-        totalSupply = 10000000000000000000000000;
+        totalSupply = 100000000000000000000000000;
         _balances[owner] = totalSupply;
         emit Transfer(address(0), owner, totalSupply);
         emit OwnershipTransferred(address(0), owner);
